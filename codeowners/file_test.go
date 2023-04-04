@@ -1,4 +1,4 @@
-package owners
+package codeowners
 
 import (
 	"bytes"

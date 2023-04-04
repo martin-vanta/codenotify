@@ -1,4 +1,4 @@
-package owners
+package codeowners
 
 import (
 	"errors"
@@ -10,14 +10,18 @@ import (
 	"github.com/spf13/afero"
 )
 
+const (
+	defaultOwnersFileName = "OWNERS"
+)
+
 type Matcher struct {
 	fs             afero.Fs // Mocked FS for testing.
 	ownersFileName string
 	ownersFiles    map[string]*OwnersFile
 }
 
-func NewMatcher(ownersFileName string) *Matcher {
-	return newMatcherWithFs(ownersFileName, afero.NewOsFs())
+func NewMatcher() *Matcher {
+	return newMatcherWithFs(defaultOwnersFileName, afero.NewOsFs())
 }
 
 func newMatcherWithFs(ownersFileName string, fs afero.Fs) *Matcher {
@@ -52,43 +56,43 @@ func (m *Matcher) Load(dirPath string) (*OwnersFile, error) {
 	return m.ownersFiles[dirPath], nil
 }
 
-func (m *Matcher) Match(filePath string) (*Match, error) {
+func (m *Matcher) Match(filePath string) (Match, error) {
 	// Search in a/b/OWNERS -> a/OWNERS -> OWNERS
 	parts := strings.Split(filepath.Clean(filePath), string(os.PathSeparator))
 	for i := len(parts) - 1; i >= 0; i-- {
 		dirPath := filepath.Join(parts[:i]...)
 		ownersFile, err := m.Load(dirPath)
 		if err != nil {
-			return nil, err
+			return Match{}, nil
 		}
 
 		relFilePath, err := filepath.Rel(dirPath, filePath)
 		if err != nil {
-			return nil, err
+			return Match{}, nil
 		}
 
 		match, err := matchInFile(ownersFile, relFilePath)
 		if err != nil {
-			return nil, err
+			return Match{}, nil
 		}
 
-		if match != nil {
+		if len(match.RequiredOwners) > 0 || len(match.OptionalOwners) > 0 {
 			return match, nil
 		}
 	}
 
-	return nil, nil
+	return Match{}, nil
 }
 
-func matchInFile(ownersFile *OwnersFile, relFilePath string) (*Match, error) {
-	match := &Match{}
+func matchInFile(ownersFile *OwnersFile, relFilePath string) (Match, error) {
+	match := Match{}
 	for _, section := range ownersFile.Sections {
 		for i := len(section.Rules) - 1; i >= 0; i-- {
 			rule := section.Rules[i]
 
 			matched, err := doublestar.PathMatch(rule.Pattern, relFilePath)
 			if err != nil {
-				return nil, err
+				return Match{}, nil
 			}
 
 			if matched {
@@ -104,10 +108,6 @@ func matchInFile(ownersFile *OwnersFile, relFilePath string) (*Match, error) {
 				break
 			}
 		}
-	}
-
-	if len(match.RequiredOwners) == 0 && len(match.OptionalOwners) == 0 {
-		return nil, nil
 	}
 	return match, nil
 }

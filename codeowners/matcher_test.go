@@ -1,4 +1,4 @@
-package owners
+package codeowners
 
 import (
 	"testing"
@@ -41,33 +41,33 @@ func TestMatcherMatch(t *testing.T) {
 
 	tests := []struct {
 		filePath string
-		expected *Match
+		expected Match
 	}{
-		{filePath: "", expected: nil},
-		{filePath: ".", expected: nil},
-		{filePath: "does_not_exist.go", expected: nil},
-		{filePath: "a/does_not_exist.go", expected: nil},
-		{filePath: "a/b/c/d/does_not_exist.go", expected: nil},
+		{filePath: "", expected: Match{}},
+		{filePath: ".", expected: Match{}},
+		{filePath: "does_not_exist.go", expected: Match{}},
+		{filePath: "a/does_not_exist.go", expected: Match{}},
+		{filePath: "a/b/c/d/does_not_exist.go", expected: Match{}},
 
-		{filePath: "root.go", expected: &Match{RequiredOwners: []string{"@root"}}},
-		{filePath: "root_optional.go", expected: &Match{OptionalOwners: []string{"@root_optional"}}},
-		{filePath: "root_slash.go", expected: &Match{RequiredOwners: []string{"@root_slash"}}},
-		{filePath: "root_slash_unnormalized.go", expected: &Match{RequiredOwners: []string{"@root_slash_unnormalized"}}},
+		{filePath: "root.go", expected: Match{RequiredOwners: []string{"@root"}}},
+		{filePath: "root_optional.go", expected: Match{OptionalOwners: []string{"@root_optional"}}},
+		{filePath: "root_slash.go", expected: Match{RequiredOwners: []string{"@root_slash"}}},
+		{filePath: "root_slash_unnormalized.go", expected: Match{RequiredOwners: []string{"@root_slash_unnormalized"}}},
 
-		{filePath: "a/a.go", expected: &Match{RequiredOwners: []string{"@a"}}},
-		{filePath: "a/a_optional.go", expected: &Match{OptionalOwners: []string{"@a_optional"}}},
-		{filePath: "a/a_both.go", expected: &Match{RequiredOwners: []string{"@a"}, OptionalOwners: []string{"@a_optional"}}},
-		{filePath: "a/a_slash.go", expected: &Match{RequiredOwners: []string{"@a_slash"}}},
+		{filePath: "a/a.go", expected: Match{RequiredOwners: []string{"@a"}}},
+		{filePath: "a/a_optional.go", expected: Match{OptionalOwners: []string{"@a_optional"}}},
+		{filePath: "a/a_both.go", expected: Match{RequiredOwners: []string{"@a"}, OptionalOwners: []string{"@a_optional"}}},
+		{filePath: "a/a_slash.go", expected: Match{RequiredOwners: []string{"@a_slash"}}},
 
-		{filePath: "doublestar_prefix.s", expected: &Match{RequiredOwners: []string{"@doublestar_prefix"}}},
-		{filePath: "a/doublestar_prefix.s", expected: &Match{RequiredOwners: []string{"@doublestar_prefix"}}},
-		{filePath: "a/b/c/d/doublestar_prefix.s", expected: &Match{RequiredOwners: []string{"@doublestar_prefix"}}},
+		{filePath: "doublestar_prefix.s", expected: Match{RequiredOwners: []string{"@doublestar_prefix"}}},
+		{filePath: "a/doublestar_prefix.s", expected: Match{RequiredOwners: []string{"@doublestar_prefix"}}},
+		{filePath: "a/b/c/d/doublestar_prefix.s", expected: Match{RequiredOwners: []string{"@doublestar_prefix"}}},
 
-		{filePath: "a/doublestar.s", expected: &Match{RequiredOwners: []string{"@doublestar"}}},
-		{filePath: "a/b/c/d/doublestar.s", expected: &Match{RequiredOwners: []string{"@doublestar"}}},
+		{filePath: "a/doublestar.s", expected: Match{RequiredOwners: []string{"@doublestar"}}},
+		{filePath: "a/b/c/d/doublestar.s", expected: Match{RequiredOwners: []string{"@doublestar"}}},
 
-		{filePath: "b/singlestar.s", expected: &Match{RequiredOwners: []string{"@singlestar"}}},
-		{filePath: "b/c/d/singlestar.s", expected: nil},
+		{filePath: "b/singlestar.s", expected: Match{RequiredOwners: []string{"@singlestar"}}},
+		{filePath: "b/c/d/singlestar.s", expected: Match{}},
 	}
 	for _, test := range tests {
 		got, err := matcher.Match(test.filePath)

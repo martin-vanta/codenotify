@@ -2,7 +2,7 @@
 // Docs: https://docs.gitlab.com/ee/user/project/code_owners.html
 // Reference Impl: https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/lib/gitlab/code_owners
 
-package owners
+package codeowners
 
 import (
 	"bufio"
